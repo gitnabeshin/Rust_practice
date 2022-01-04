@@ -6,6 +6,8 @@
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
+const SERVER_URL: &str = "127.0.0.1:8080";
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world! Actix-web")
@@ -22,13 +24,17 @@ async fn manual_hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+    println!("HTTP Server http://{} starting...", SERVER_URL);
+
     HttpServer::new(|| {
         App::new()
             .service(hello)
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
     })
-    .bind("127.0.0.1:8080")?
+    // .bind("127.0.0.1:8080")?
+    .bind(SERVER_URL)?
     .run()
     .await
 }
