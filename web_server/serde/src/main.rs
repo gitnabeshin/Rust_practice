@@ -1,5 +1,5 @@
 /*****************************************************************
-* SQLite3 connection pool sample
+* serde POST request parse sample
 * https://github.com/forcia/rustbook/blob/master/ch05/5-4
 ******************************************************************/
 use actix_web::{get, http::header, post, web, App, HttpResponse, HttpServer, ResponseError};
