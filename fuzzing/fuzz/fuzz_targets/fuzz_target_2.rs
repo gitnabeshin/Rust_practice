@@ -1,8 +1,8 @@
 #![no_main]
-use fuzzing::sum;
+use fuzzing::sum_wrap;
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
     // fuzzed code goes here
-    sum(data);
+    sum_wrap(data);
 });
