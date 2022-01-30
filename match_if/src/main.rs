@@ -57,18 +57,18 @@ fn plus_one(x: Option<i32>) -> Option<i32> {
 
 fn some_value(val: u32) {
     match val {
-        1=> println!("  one"),
-        2=> println!("  two"),
-        3=> println!("  three"),
-        4=> println!("  four"),
-        _=> println!("  other value."),
+        1 => println!("  one"),
+        2 => println!("  two"),
+        3 => println!("  three"),
+        4 => println!("  four"),
+        _ => println!("  other value."),
     }
 }
 
 fn some_value2(val: u32) {
     match val {
         3 => println!("  three"),
-        _=> println!("  other value."),
+        _ => println!("  other value."),
     }
 
     if let 3 = val {
@@ -77,7 +77,6 @@ fn some_value2(val: u32) {
         println!("  OTHER VALUE.");
     }
 }
-
 
 fn main() {
     let coin = Coin::Dime;
