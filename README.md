@@ -1,5 +1,5 @@
-# Rust_practice
-My practice code of Rust.
+# Rust_plactice
+My plactice code of Rust.
 
 
 # Reference
