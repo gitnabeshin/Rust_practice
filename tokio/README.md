@@ -9,12 +9,20 @@ $ mini-redis-server
 $ mini-redis-cli get foo
 ```
 
+## run
+
+```
+$ cargo run
+$ cargo run --example hello-redis
+```
+
 ## Cargo.toml
 
 ```
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 mini-redis = "0.4"
+bytes = "1"
 ```
 
 # Reference

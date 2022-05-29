@@ -1,33 +1,63 @@
-use mini_redis::{client, Result};
+use bytes::Bytes;
+use mini_redis::{Connection, Frame};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use tokio::net::{TcpListener, TcpStream};
 
-#[tokio::main]
-async fn main() -> Result<()> {
+type Db = Arc<Mutex<HashMap<String, Bytes>>>;
 
-    let mut client = client::connect("127.0.0.1:6379").await?;
+async fn server_process(socket: TcpStream, db: Db) {
+    use mini_redis::Command::{self, Get, Set};
 
-    client.set("hello", "world".into()).await?;
+    // let mut db = HashMap::new();
 
-    let result = client.get("hello").await?;
+    let mut conn = Connection::new(socket);
 
-    println!("got val from server; result={:?}", result);
- 
-    Ok(())
+    while let Some(frame) = conn.read_frame().await.unwrap() {
+        let response = match Command::from_frame(frame).unwrap() {
+            Set(cmd) => {
+                println!("SET: {:?}", cmd);
+
+                // needs mut here for insert
+                let mut db = db.lock().unwrap();
+                db.insert(cmd.key().to_string(), cmd.value().clone());
+                Frame::Simple("OK".to_string())
+            }
+            Get(cmd) => {
+                println!("GET: {:?}", cmd);
+
+                let db = db.lock().unwrap();
+                if let Some(value) = db.get(cmd.key()) {
+                    Frame::Bulk(value.clone().into())
+                } else {
+                    Frame::Null
+                }
+            }
+            cmd => panic!("unimplemented {:?}", cmd),
+        };
+
+        conn.write_frame(&response).await.unwrap();
+    }
 }
 
+#[tokio::main]
+async fn main() {
+    // bind listener to this address
+    let listener = TcpListener::bind("127.0.0.1:6379").await.unwrap();
 
+    let db = Arc::new(Mutex::new(HashMap::new()));
 
-// async fn say_world() {
-//     println!("WORLD");
-// }
+    loop {
+        // pub async fn accept(&self) -> Result<(TcpStream, SocketAddr)>
+        let (socket, _) = listener.accept().await.unwrap();
 
-// #[tokio::main]
-// async fn main() {
-//     // Calling `say_world()` does not execute the body of `say_world()`.
-//     let op = say_world();
+        println!("accepted");
 
-//     // This println! comes first
-//     println!("hello");
+        let db = db.clone();
 
-//     // Calling `.await` on `op` starts executing `say_world`.
-//     op.await;
-// }
+        // Spawns a new asynchronous task
+        tokio::spawn(async move {
+            server_process(socket, db).await;
+        });
+    }
+}
